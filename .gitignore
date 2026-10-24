@@ -1,5 +1,5 @@
 # Python bytecode
---pycache__/
+__pycache__/
 *.py[cod]
 *$py.class
 
@@ -15,3 +15,6 @@ ENV/
 
 # Ignore all files and folders starting with check_
 check_*
+
+# SQLite database files
+data/*.db

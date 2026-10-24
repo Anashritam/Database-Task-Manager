@@ -43,7 +43,6 @@ Database-Task-Manager/
 ```
 
 ## Architecture
-## Architecture
 
 The application uses a layered architecture to separate command-line interaction, business logic, database operations, and storage.
 
