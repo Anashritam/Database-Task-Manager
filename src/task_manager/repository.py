@@ -56,3 +56,14 @@ def delete_task(
     cursor = connection.execute(sql,(task_id,))
 
     return cursor.rowcount > 0
+
+def create_project(
+    connection: sqlite3.Connection,
+    name: str,
+) -> int:
+    sql = """
+        INSERT INTO projects (name)
+        VALUES (?)
+    """
+    cursor = connection.execute(sql, (name,))
+    return cursor.lastrowid

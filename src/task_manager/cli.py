@@ -13,7 +13,13 @@ def main():
     parser = argparse.ArgumentParser(description="Database Task Manager CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # Command: create
+    # Command: project
+    project_parser = subparsers.add_parser("project", help="Manage projects")
+    project_subparsers = project_parser.add_subparsers(dest="project_command", required=True)
+    project_create_parser = project_subparsers.add_parser("create", help="Create a new project")
+    project_create_parser.add_argument("name", type=str, help="Project name")
+
+    # Command: create (task)
     create_parser = subparsers.add_parser("create", help="Create a new task")
     create_parser.add_argument("project_id", type=int, help="Project ID")
     create_parser.add_argument("title", type=str, help="Task title")
@@ -37,18 +43,24 @@ def main():
 
     args = parser.parse_args()
 
-    # If no command was supplied, show help and exit
     if not args.command:
         parser.print_help()
         sys.exit(1)
 
-    # 2. NOW we initialize the database and open the connection
-    initialize_database(DB_PATH)
-    conn = get_connection(DB_PATH)
-
+    # 2. Initialize connection to None so the finally block can check it safely
+    conn = None
+    
     try:
-        # 3. Execute the requested command using the SERVICE layer
-        if args.command == "create":
+        # 3. NOW we initialize the database and open the connection INSIDE the try block
+        initialize_database(DB_PATH)
+        conn = get_connection(DB_PATH)
+
+        # 4. Execute the requested command using the SERVICE layer
+        if args.command == "project" and args.project_command == "create":
+            project_id = services.create_project_service(conn, args.name)
+            print(f"Success: Created project with ID {project_id}")
+
+        elif args.command == "create":
             task_id = services.create_task_service(
                 conn, args.project_id, args.title, args.description
             )
@@ -86,20 +98,22 @@ def main():
             else:
                 print(f"Error: Task with ID {args.task_id} not found.")
 
-    # 4. Handle errors gracefully
+    # 5. Handle errors gracefully
     except ValueError as e:
         print(f"Validation Error: {e}")
         sys.exit(1)
     except sqlite3.IntegrityError as e:
-        print(f"Database Error: Invalid relationship. {e}")
+        # FIX 2: Removed "Invalid relationship." to avoid misleading the user 
+        # if the error was actually a UNIQUE or NOT NULL constraint violation.
+        print(f"Database Error: {e}")
         sys.exit(1)
     except sqlite3.Error as e:
-        # NEW: Catch any other unexpected database errors gracefully
         print(f"Database Error: An unexpected database error occurred. {e}")
         sys.exit(1)
     finally:
-        # 5. Always close the connection
-        conn.close()
+        # FIX 1: Only close the connection if it was successfully created.
+        if conn is not None:
+            conn.close()
 
 if __name__ == "__main__":
     main()

@@ -94,3 +94,16 @@ def test_list_tasks_service_with_data(db_conn):
     assert len(tasks) == 2
     assert tasks[0]["title"] == "First Task"
     assert tasks[1]["title"] == "Second Task"
+
+def test_create_project_service_valid(db_conn):
+    project_id = services.create_project_service(db_conn, "  Service Project  ")
+    
+    # Verify it was committed and stripped
+    cursor = db_conn.execute("SELECT name FROM projects WHERE id = ?", (project_id,))
+    project = cursor.fetchone()
+    assert project["name"] == "Service Project"
+
+def test_create_project_service_empty_name(db_conn):
+    with pytest.raises(ValueError, match="Project name cannot be empty."):
+        services.create_project_service(db_conn, "   ")
+

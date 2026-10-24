@@ -95,4 +95,20 @@ def test_create_invalid_project(cli_env, monkeypatch, capsys):
     code, out, err = run_cli(monkeypatch, capsys, ["create", "9999", "Ghost Task"])
     
     assert code == 1
-    assert "Database Error: Invalid relationship." in out
+    # NEW ASSERTION: Check for the generic prefix and the actual SQLite error
+    assert "Database Error:" in out
+    assert "FOREIGN KEY constraint failed" in out
+
+def test_project_create_success(cli_env, monkeypatch, capsys):
+    """Verify creating a valid project via CLI."""
+    code, out, err = run_cli(monkeypatch, capsys, ["project", "create", "CLI Project"])
+    
+    assert code == 0
+    assert "Success: Created project with ID" in out
+
+def test_project_create_empty_name(cli_env, monkeypatch, capsys):
+    """Verify the CLI catches the ValueError for an empty project name."""
+    code, out, err = run_cli(monkeypatch, capsys, ["project", "create", "   "])
+    
+    assert code == 1
+    assert "Validation Error: Project name cannot be empty." in out

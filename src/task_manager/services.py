@@ -61,3 +61,18 @@ def list_tasks_service(
     """Retrieve all tasks from the database."""
     # Read operation: no transaction block needed.
     return repository.list_tasks(connection)
+
+
+def create_project_service(
+    connection: sqlite3.Connection,
+    name: str,
+) -> int:
+    name = name.strip()
+
+    if not name:
+        raise ValueError("Project name cannot be empty.")
+
+    with connection:
+        project_id = repository.create_project(connection, name)
+
+    return project_id

@@ -75,3 +75,13 @@ def test_delete_nonexistent_task(db_conn):
     success = repository.delete_task(db_conn, 9999)
     db_conn.commit()
     assert success is False
+
+def test_create_project(db_conn):
+    project_id = repository.create_project(db_conn, "New Repo Project")
+    db_conn.commit()
+    
+    cursor = db_conn.execute("SELECT id, name FROM projects WHERE id = ?", (project_id,))
+    project = cursor.fetchone()
+    
+    assert project is not None
+    assert project["name"] == "New Repo Project"
