@@ -1,0 +1,17 @@
+# Python bytecode
+--pycache__/
+*.py[cod]
+*$py.class
+
+*.egg-info
+*.egg
+
+.venv/
+venv/
+env/
+ENV/
+
+.pytest_cache/
+
+# Ignore all files and folders starting with check_
+check_*
